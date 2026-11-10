@@ -6,7 +6,7 @@
  *
  * @package whalefall
  * @author 零落山河
- * @version 2.0.0
+ * @version 2.0.1
  * @link https://gonghaiwen.icu
  */
 
@@ -14,7 +14,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
 }
 
-define('DSW_VERSION', '2.0.0');
+define('DSW_VERSION', '2.0.1');
 
 /* ============================================================
  * 0. 主题选项：默认值 / 读取
@@ -250,12 +250,12 @@ function themeConfig($form)
     ));
 
     /** 个人信息 */
-    $form->addInput(new \Typecho\Widget\Helper\Form\Element\Url(
+    $form->addInput(new \Typecho\Widget\Helper\Form\Element\Text(
         'avatarUrl',
         null,
         '',
         _t('头像地址'),
-        _t('填写图片 URL，留空则显示 🐳 图标。')
+        _t('可填完整 URL，也可填站内相对路径（如 /usr/uploads/2026/11/avatar.jpg），留空则显示 🐳 图标。')
     ));
 
     $form->addInput(new \Typecho\Widget\Helper\Form\Element\Text(

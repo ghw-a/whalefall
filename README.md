@@ -199,10 +199,6 @@ define('DSW_VERSION', '2.0.1');
 cd whalefall && zip -r ../WhaleFall-2.0.0.zip . -x "*.git*"
 ```
 
-## 更新日志
-
-见 [CHANGELOG.md](CHANGELOG.md)。
-
 ## 致谢
 
 - 视觉气质参考了 [RyuChan](https://github.com/kobaridev/RyuChan)（新拟态、超圆角、全屏 Banner）与一些同类 Typecho 主题的排版习惯，**代码为原创实现**

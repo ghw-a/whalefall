@@ -1,0 +1,765 @@
+/*!
+ * AdminWhale · 鲸落后台皮肤
+ * 把 Typecho 管理后台变成鲸落的样子：深色渐变顶栏 + 新拟态柔光卡 + 胶囊按钮
+ * 纯 CSS 覆盖，不改任何核心文件；停用插件即刻还原。
+ * @version 0.1.1
+ */
+html.aw {
+  --bg: #edf1f8;
+  --bg-soft: #f4f7fc;
+  --card: #f4f7fd;
+  --text: #2b3040;
+  --text-soft: rgba(43,48,64,.64);
+  --text-mute: rgba(43,48,64,.42);
+  --border: rgba(43,48,64,.07);
+  --primary: #4f9bff;
+  --secondary: #8b7cf6;
+  --accent: #38d6c4;
+  --aw-nav-a: #262b3a;
+  --aw-nav-b: #333c58;
+  --aw-nav-c: #414f78;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-pill: 999px;
+  --shadow-out: 10px 10px 22px rgba(158,173,196,.46), -10px -10px 22px rgba(255,255,255,.98);
+  --shadow-out-hover: 16px 18px 34px rgba(158,173,196,.52), -12px -14px 28px rgba(255,255,255,1);
+  --shadow-in: inset 4px 4px 10px rgba(158,173,196,.4), inset -4px -4px 10px rgba(255,255,255,.95);
+}
+
+/* 四套配色：与前台主题同源 */
+html.aw[data-aw-palette="mint"] {
+  --primary: #2fbfa0;
+  --secondary: #4f9bff;
+  --accent: #ffc46b;
+  --aw-nav-a: #1f3330;
+  --aw-nav-b: #254b45;
+  --aw-nav-c: #2a6357;
+}
+
+html.aw[data-aw-palette="forest"] {
+  --primary: #6e9e62;
+  --secondary: #4f7a45;
+  --accent: #e5a06a;
+  --bg: #f4f0e7;
+  --bg-soft: #efeade;
+  --card: #fdfbf6;
+  --text: #3a3a30;
+  --text-soft: rgba(58, 58, 48, .64);
+  --text-mute: rgba(58, 58, 48, .42);
+  --border: rgba(58, 58, 48, .08);
+  --shadow-out: 10px 10px 22px rgba(158, 146, 118, .30), -10px -10px 22px rgba(255, 255, 255, .95);
+  --shadow-out-hover: 16px 18px 34px rgba(158, 146, 118, .38), -12px -14px 28px rgba(255, 255, 255, 1);
+  --shadow-in: inset 4px 4px 10px rgba(158, 146, 118, .26), inset -4px -4px 10px rgba(255, 255, 255, .92);
+  --aw-nav-a: #2b3128;
+  --aw-nav-b: #3d4735;
+  --aw-nav-c: #55643f;
+}
+
+html.aw[data-aw-palette="rose"] {
+  --primary: #e78fb8;
+  --secondary: #9b8cf0;
+  --accent: #5aa2ff;
+  --aw-nav-a: #33262e;
+  --aw-nav-b: #4a3242;
+  --aw-nav-c: #5f3d55;
+}
+html.aw body {
+  background:
+    radial-gradient(1200px 520px at 12% -8%, rgba(79,155,255,.13), transparent 62%),
+    radial-gradient(900px 480px at 92% 4%, rgba(139,124,246,.12), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: "M PLUS Rounded 1c", "Noto Sans SC", "PingFang SC",
+    "幼圆", "YouYuan", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: 93%;
+}
+html.aw a { color: #3b7fd4; }
+html.aw a:hover { color: var(--primary); text-decoration: none; }
+
+/* --- 顶栏 --- */
+html.aw .typecho-head-nav {
+  height: 56px; padding: 0 18px;
+  background: linear-gradient(112deg, var(--aw-nav-a) 0%, var(--aw-nav-b) 48%, var(--aw-nav-c) 100%);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 30px rgba(28,38,66,.22);
+}
+html.aw .typecho-head-nav::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+  opacity: .7;
+}
+html.aw .typecho-head-nav #typecho-nav-list > ul:first-child { border-left: none; }
+html.aw .typecho-head-nav #typecho-nav-list > ul .parent > a {
+  position: relative; border-right: none; background: transparent;
+  padding: 0 16px; height: 56px; line-height: 56px;
+  color: rgba(255,255,255,.7); font-weight: 500; border-radius: 0;
+}
+html.aw .typecho-head-nav #typecho-nav-list > ul .parent > a::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 0;
+  height: 3px; border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transform: scaleX(0); transform-origin: center;
+  transition: transform .3s cubic-bezier(.22,1,.36,1);
+}
+html.aw .typecho-head-nav #typecho-nav-list > ul .parent > a:hover,
+html.aw .typecho-head-nav #typecho-nav-list > ul.expanded .parent > a {
+  color: #fff; background: rgba(255,255,255,.06);
+}
+html.aw .typecho-head-nav #typecho-nav-list > ul .parent > a:hover::after,
+html.aw .typecho-head-nav #typecho-nav-list > ul.expanded .parent > a::after {
+  transform: scaleX(1);
+}
+html.aw .typecho-head-nav #typecho-nav-list > ul .child {
+  top: 62px; min-width: 172px; padding: 8px;
+  background: rgba(33,39,56,.94);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: var(--radius-md);
+  box-shadow: 0 22px 48px rgba(14,20,36,.42);
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+html.aw .typecho-head-nav #typecho-nav-list > ul .child li a {
+  height: 38px; line-height: 38px; padding: 0 14px;
+  border-radius: 12px; color: rgba(255,255,255,.7);
+}
+html.aw .typecho-head-nav #typecho-nav-list > ul .child li a:hover {
+  background: rgba(79,155,255,.18); color: #fff;
+}
+html.aw .typecho-head-nav #typecho-nav-list > ul .child li.focus a {
+  color: #fff; font-weight: 600;
+  background: linear-gradient(120deg, rgba(79,155,255,.3), rgba(139,124,246,.26));
+}
+html.aw .typecho-head-nav .operate a {
+  height: 56px; line-height: 56px; border-right: none;
+  color: rgba(255,255,255,.66); padding: 0 14px;
+  border-radius: var(--radius-pill); margin-left: 4px;
+}
+html.aw .typecho-head-nav .operate a:hover {
+  color: #fff; background: rgba(255,255,255,.1);
+}
+html.aw .typecho-head-nav .operate a.author {
+  background: rgba(79,155,255,.2);
+  border: 1px solid rgba(79,155,255,.35);
+  height: 34px; line-height: 32px; margin-top: 11px; color: #dfe8ff;
+}
+
+/* --- 主体 --- */
+html.aw .main { padding: 0 20px; }
+html.aw .body.container { max-width: 1180px; }
+html.aw .typecho-page-title h2 {
+  margin: 32px 0 18px; font-size: 1.6em; font-weight: 700;
+  letter-spacing: .01em; color: var(--text);
+  display: flex; align-items: center; gap: 12px;
+}
+html.aw .typecho-page-title h2::before {
+  content: ""; width: 6px; height: 26px; border-radius: 6px;
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
+  box-shadow: 0 4px 14px rgba(79,155,255,.4);
+}
+html.aw .typecho-page-title h2 a {
+  margin-left: auto; padding: 9px 18px; font-size: 13px; font-weight: 600;
+  border-radius: var(--radius-pill); color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 8px 20px rgba(79,155,255,.34);
+  transition: .3s;
+}
+html.aw .typecho-page-title h2 a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(79,155,255,.44);
+}
+
+/* --- 卡片化 --- */
+html.aw .welcome-board,
+html.aw .latest-link,
+html.aw .typecho-table-wrap {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-out);
+  padding: 28px 30px;
+  border: 1px solid rgba(255,255,255,.7);
+}
+html.aw .latest-link { padding: 22px 24px; }
+html.aw .typecho-table-wrap { padding: 12px 26px 22px; }
+
+/* Typecho 1.3 去掉了 .typecho-table-wrap，表格直接挂在 .operate-form 下 */
+html.aw .operate-form > .typecho-list-table {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-out);
+  border: 1px solid rgba(255, 255, 255, .7);
+  border-collapse: separate;
+  border-spacing: 0;
+}
+html.aw .operate-form > .typecho-list-table th:first-child,
+html.aw .operate-form > .typecho-list-table td:first-child { padding-left: 26px; }
+html.aw .operate-form > .typecho-list-table th:last-child,
+html.aw .operate-form > .typecho-list-table td:last-child { padding-right: 26px; }
+html.aw .operate-form { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+html.aw .welcome-board { color: var(--text-soft); font-size: 1.06em; }
+html.aw .welcome-board p { margin: 0; }
+html.aw .welcome-board em {
+  font-size: 1.5em; font-weight: 700; font-family: inherit;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  padding: 0 3px;
+}
+html.aw #start-link {
+  border-bottom: 1px dashed var(--border);
+  margin: 22px 0 4px; padding: 0 0 22px;
+  display: flex; flex-wrap: wrap; gap: 10px;
+}
+html.aw #start-link li { float: none; margin: 0; }
+html.aw #start-link a {
+  display: inline-block; padding: 9px 18px; border-radius: var(--radius-pill);
+  background: var(--bg-soft); box-shadow: var(--shadow-in);
+  color: var(--text-soft); font-size: 14px; font-weight: 500;
+  transition: .28s;
+}
+html.aw #start-link a:hover {
+  color: #fff; transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 10px 22px rgba(79,155,255,.32);
+}
+html.aw .latest-link h3 {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin: 0 0 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+html.aw .latest-link li { padding: 7px 0; color: var(--text-soft); }
+html.aw .latest-link span {
+  border-right: none; color: var(--text-mute); width: auto; padding-right: 10px;
+  font-variant-numeric: tabular-nums;
+}
+html.aw .latest-link li a.title { color: var(--text-soft); }
+html.aw .latest-link li a.title:hover { color: var(--primary); }
+
+/* --- 标签页 --- */
+html.aw .typecho-option-tabs {
+  display: inline-flex; gap: 4px; padding: 5px;
+  background: var(--bg-soft); border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-in);
+  margin: 1em 0 0;
+}
+html.aw .typecho-option-tabs a {
+  border: none; border-radius: var(--radius-pill);
+  height: 34px; line-height: 34px; padding: 0 18px;
+  color: var(--text-soft); font-weight: 500; margin-right: 0;
+}
+html.aw .typecho-option-tabs li:first-child a,
+html.aw .typecho-option-tabs li:last-child a { border-radius: var(--radius-pill); }
+html.aw .typecho-option-tabs a:hover { background: rgba(255,255,255,.6); }
+html.aw .typecho-option-tabs li.current a {
+  background: #fff; color: var(--text); font-weight: 600;
+  box-shadow: 0 4px 12px rgba(120,140,175,.2);
+}
+
+/* --- 操作条 --- */
+html.aw .typecho-list-operate { margin: 18px 0; }
+html.aw .btn {
+  border-radius: var(--radius-pill); height: 34px; padding: 0 18px;
+  background: var(--bg-soft); color: var(--text-soft); font-weight: 500;
+  box-shadow: 4px 4px 10px rgba(163,177,198,.3), -4px -4px 10px rgba(255,255,255,.9);
+  transition: .25s;
+}
+html.aw .btn:hover {
+  color: var(--text); transform: translateY(-1px);
+  box-shadow: 6px 8px 16px rgba(163,177,198,.4), -5px -5px 12px rgba(255,255,255,.95);
+}
+html.aw .btn.primary,
+html.aw .btn-l.primary {
+  color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 10px 24px rgba(79,155,255,.36);
+}
+html.aw .btn.primary:hover { filter: brightness(1.05); }
+html.aw .btn-s { height: 32px; }
+
+html.aw input[type="text"],
+html.aw input[type="password"],
+html.aw select {
+  border: 1px solid transparent; border-radius: var(--radius-pill);
+  background: var(--bg-soft); color: var(--text);
+  height: 34px; padding: 0 16px;
+  box-shadow: var(--shadow-in);
+  transition: .3s;
+}
+html.aw input[type="text"]:focus,
+html.aw input[type="password"]:focus,
+html.aw select:focus {
+  outline: none;
+  box-shadow: var(--shadow-in), 0 0 0 3px rgba(79,155,255,.26);
+}
+html.aw input::placeholder { color: var(--text-mute); }
+html.aw input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: var(--primary);
+}
+
+/* --- 表格 --- */
+html.aw .typecho-list-table th {
+  padding: 16px 12px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-mute); font-weight: 600; font-size: 13px;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+html.aw .typecho-list-table td {
+  padding: 15px 12px; border-bottom: 1px solid var(--border);
+  color: var(--text-soft); vertical-align: middle;
+}
+html.aw .typecho-list-table tr:last-child td { border-bottom: none; }
+html.aw .typecho-list-table tbody tr {
+  transition: background .25s;
+  border-radius: 12px;
+}
+html.aw .typecho-list-table tbody tr:hover { background: rgba(79,155,255,.07); }
+html.aw .typecho-list-table td > a:first-child {
+  color: var(--text); font-weight: 600;
+}
+html.aw .typecho-list-table td > a:first-child:hover { color: var(--primary); }
+html.aw .balloon {
+  background: rgba(79,155,255,.14); color: #3b7fd4; border-radius: var(--radius-pill);
+  height: 20px; line-height: 20px; font-weight: 600;
+}
+html.aw em.status {
+  background: rgba(139,124,246,.14); color: #6b5cd6;
+  border-radius: var(--radius-pill); padding: 1px 9px; margin-left: 7px;
+  font-weight: 600;
+}
+html.aw .i-edit, html.aw .i-exlink { background: var(--text-mute); }
+html.aw .i-edit:hover, html.aw .i-exlink:hover { background: var(--primary); }
+
+/* --- 分页 --- */
+html.aw .typecho-pager { gap: 6px; }
+html.aw .typecho-pager a {
+  border-radius: var(--radius-pill); height: 34px; line-height: 34px;
+  padding: 0 14px; min-width: 34px; text-align: center; color: var(--text-soft);
+  box-shadow: var(--shadow-out); background: var(--card);
+}
+html.aw .typecho-pager a:hover {
+  color: var(--primary); transform: translateY(-1px);
+}
+html.aw .typecho-pager li.current a {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff; box-shadow: 0 8px 18px rgba(79,155,255,.34);
+}
+
+/* --- 页脚 --- */
+html.aw .typecho-foot {
+  color: var(--text-mute); padding: 40px 20px 52px;
+}
+html.aw .typecho-foot .copyright a { color: var(--text-mute); }
+html.aw .typecho-foot .resource a { color: var(--text-mute); }
+html.aw .typecho-foot .resource a:hover { color: var(--primary); }
+
+/* --- 写作页：纸张感 --- */
+html.aw .typecho-post-area form { gap: 26px; }
+html.aw .typecho-post-area .title { margin: 0 0 2px; }
+html.aw .typecho-post-area .title input.title {
+  height: 62px; padding: 0 2px; font-size: 27px; font-weight: 700;
+  letter-spacing: .01em; color: var(--text);
+  background: transparent; border: none; border-radius: 0;
+  border-bottom: 2px dashed rgba(43,48,64,.12);
+  box-shadow: none;
+}
+html.aw .typecho-post-area .title input.title::placeholder { color: var(--text-mute); font-weight: 500; }
+html.aw .typecho-post-area .title input.title:focus {
+  border-bottom-color: rgba(79,155,255,.6);
+  box-shadow: none;
+}
+html.aw .typecho-post-area .url-slug {
+  margin: 10px 0 0; color: var(--text-mute); font-size: 12px;
+}
+html.aw .typecho-post-area .url-slug input {
+  width: 156px; height: 26px; padding: 0 12px; font-size: 12px;
+  border-radius: var(--radius-pill); border: none;
+  background: rgba(79,155,255,.12); color: #3b7fd4; box-shadow: none;
+}
+html.aw .editor {
+  margin: 18px 0 0;
+  background: #fbfcff; border-radius: 22px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.85);
+  box-shadow: var(--shadow-out);
+}
+html.aw .wmd-button-row {
+  margin: 0; padding: 11px 16px; gap: 5px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #f9fbff, #f1f5fd);
+}
+html.aw .wmd-button-row li span {
+  background: transparent; border-radius: 10px;
+  height: 29px; line-height: 29px; min-width: 32px;
+  color: var(--text-soft); font-weight: 600; font-size: 12px;
+  white-space: nowrap;
+  transition: .22s;
+}
+html.aw .wmd-button-row li span:hover {
+  background: rgba(79,155,255,.14); color: #3b7fd4;
+}
+html.aw .wmd-edittab {
+  padding: 12px 20px 0; margin: 0; display: flex; gap: 6px;
+}
+html.aw .wmd-edittab a {
+  padding: 5px 15px; border-radius: var(--radius-pill); margin-right: 0;
+  font-size: 12px; font-weight: 500; color: var(--text-mute);
+  background: var(--bg-soft);
+}
+html.aw .wmd-edittab a.current {
+  color: #fff; font-weight: 600;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 6px 14px rgba(79,155,255,.3);
+}
+html.aw .typecho-post-area textarea {
+  border: none; border-radius: 0; background: transparent; box-shadow: none;
+  padding: 18px 22px 24px; min-height: 350px;
+  font-size: 14px; line-height: 1.95; color: var(--text-soft);
+  resize: vertical;
+}
+html.aw .typecho-post-area textarea:focus { outline: none; }
+html.aw .typecho-post-area .submit { margin: 20px 0 0; }
+html.aw .typecho-post-area .submit .right { gap: 10px; }
+html.aw .typecho-post-area .submit .btn { height: 38px; }
+html.aw .typecho-post-area .submit .btn.primary {
+  height: 42px; padding: 0 28px; font-size: 14px; font-weight: 600;
+  box-shadow: 0 12px 26px rgba(79,155,255,.38);
+}
+html.aw #edit-secondary {
+  background: var(--card); border-radius: 22px;
+  padding: 16px 18px 20px;
+  border: 1px solid rgba(255,255,255,.75);
+  box-shadow: var(--shadow-out);
+}
+html.aw #edit-secondary .typecho-option-tabs {
+  margin: 0 0 4px; padding: 4px; gap: 4px; display: flex;
+  background: var(--bg-soft); border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-in);
+}
+html.aw #edit-secondary .typecho-option-tabs a {
+  border: none; border-radius: var(--radius-pill);
+  height: 30px; line-height: 30px; font-size: 12px;
+  color: var(--text-soft); background: transparent; font-weight: 500;
+}
+html.aw #edit-secondary .typecho-option-tabs li.current a {
+  background: #fff; color: var(--text); font-weight: 600;
+  box-shadow: 0 3px 10px rgba(120,140,175,.18);
+}
+html.aw .typecho-label {
+  margin: 16px 0 8px; font-size: 12px; font-weight: 600;
+  letter-spacing: .05em; color: var(--text-mute);
+}
+html.aw .typecho-post-option li {
+  padding: 5px 0; font-size: 13px; color: var(--text-soft);
+  display: flex; align-items: center;
+}
+html.aw .typecho-post-option li label { margin-left: 8px; cursor: pointer; }
+html.aw .typecho-post-option li input[type="checkbox"] {
+  width: 16px; height: 16px; border-radius: 5px;
+  appearance: none; -webkit-appearance: none;
+  border: 1px solid rgba(43,48,64,.18); background: #fff;
+  position: relative; cursor: pointer; margin: 0;
+}
+html.aw .typecho-post-option li input[type="checkbox"]:checked,
+html.aw input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-color: transparent;
+}
+html.aw .typecho-post-option li input[type="checkbox"]:checked::after {
+  content: ""; position: absolute; left: 5px; top: 2px;
+  width: 4px; height: 8px; border: solid #fff;
+  border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+html.aw .btn-xs { height: 28px; font-size: 12px; padding: 0 14px; margin-top: 4px; }
+html.aw .typecho-date { font-variant-numeric: tabular-nums; }
+
+/* --- 登录页：深海 --- */
+html.aw[data-aw-login="1"] body.body-100 {
+  background:
+    radial-gradient(760px 460px at 18% 12%, rgba(79,155,255,.34), transparent 62%),
+    radial-gradient(680px 420px at 84% 78%, rgba(139,124,246,.3), transparent 60%),
+    radial-gradient(520px 360px at 62% 30%, rgba(56,214,196,.16), transparent 60%),
+    linear-gradient(160deg, #1c2130 0%, #252d44 52%, #2e3d5e 100%);
+  background-attachment: fixed;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login {
+  position: relative; z-index: 2;
+  width: 380px; padding: 46px 42px 40px;
+  background: rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 32px;
+  box-shadow: 0 30px 80px rgba(8,14,30,.5), inset 0 1px 0 rgba(255,255,255,.14);
+  backdrop-filter: blur(22px) saturate(1.4);
+  text-align: left;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .brand {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .brand .whale-badge {
+  width: 46px; height: 46px; border-radius: 15px;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 10px 24px rgba(79,155,255,.42);
+  color: #fff;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .brand .whale-badge svg { width: 26px; height: 26px; }
+html.aw[data-aw-login="1"] body.body-100 .typecho-login h1 {
+  margin: 0; color: #fff; font-size: 20px; font-weight: 700;
+  letter-spacing: .04em;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .sub {
+  margin: 4px 0 30px; color: rgba(255,255,255,.5); font-size: 13px;
+  letter-spacing: .08em;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login p.submit { margin-top: 26px; }
+html.aw[data-aw-login="1"] body.body-100 .typecho-login input[type="text"],
+html.aw[data-aw-login="1"] body.body-100 .typecho-login input[type="password"] {
+  width: 100%; height: 46px; padding: 0 18px; border-radius: 15px;
+  background: rgba(255,255,255,.07); color: #fff;
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: inset 2px 3px 8px rgba(0,0,0,.22);
+  font-size: 14px;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login input::placeholder { color: rgba(255,255,255,.38); }
+html.aw[data-aw-login="1"] body.body-100 .typecho-login input:focus {
+  outline: none; border-color: rgba(79,155,255,.6);
+  box-shadow: inset 2px 3px 8px rgba(0,0,0,.22), 0 0 0 4px rgba(79,155,255,.18);
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .btn-l {
+  width: 100%; height: 48px; border-radius: var(--radius-pill);
+  font-size: 15px; font-weight: 600; letter-spacing: .12em;
+  color: #fff;
+  background: linear-gradient(120deg, #4f9bff, #8b7cf6 55%, #38d6c4 130%);
+  box-shadow: 0 14px 30px rgba(79,155,255,.36);
+  transition: .3s;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .btn-l:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(79,155,255,.46);
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login label {
+  color: rgba(255,255,255,.62); font-size: 13px;
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  width: 17px; height: 17px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.32);
+  background: rgba(255,255,255,.1);
+  box-shadow: inset 1px 2px 5px rgba(0,0,0,.28);
+  cursor: pointer; position: relative;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-color: transparent;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login input[type="checkbox"]:checked::after {
+  content: ""; position: absolute; left: 5px; top: 2px;
+  width: 5px; height: 9px; border: solid #fff;
+  border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .more-link {
+  color: rgba(255,255,255,.4); margin-top: 26px; text-align: center;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .more-link a { color: rgba(255,255,255,.72); }
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .more-link a:hover { color: #fff; }
+html.aw[data-aw-login="1"] body.body-100 .login-wave {
+  position: fixed; left: 0; right: 0; bottom: 0; width: 100%; height: 190px;
+  pointer-events: none; opacity: .5;
+}
+html.aw[data-aw-login="1"] body.body-100 .login-wave use { fill: rgba(79,155,255,.18); }
+html.aw[data-aw-login="1"] body.body-100 .bubble {
+  position: fixed; border-radius: 50%; z-index: 0;
+  background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.85), rgba(120,190,255,.16) 65%, transparent 72%);
+  opacity: .5; pointer-events: none;
+}
+
+
+
+/* ============================================================
+   3. 响应式（后台要能在手机上活下来）
+   ============================================================ */
+@media (max-width: 1024px) {
+  html.aw .body.container { max-width: 100%; }
+  html.aw .latest-link { padding: 20px 20px; }
+}
+
+@media (max-width: 860px) {
+  /* 顶栏：收成汉堡 + 用户胶囊 */
+  html.aw .typecho-head-nav { height: 52px; padding: 0 12px; }
+  html.aw .typecho-head-nav button.menu-bar {
+    display: inline-block; border: none; background: transparent;
+    color: rgba(255,255,255,.82); height: 52px; padding: 0 14px 0 4px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  html.aw .typecho-head-nav #typecho-nav-list { display: none; }
+  html.aw .typecho-head-nav .operate { margin-left: auto; }
+  html.aw .typecho-head-nav .operate a {
+    height: 52px; line-height: 52px; padding: 0 10px; font-size: 12px;
+  }
+  html.aw .typecho-head-nav .operate a.author {
+    height: 30px; line-height: 28px; margin-top: 11px; padding: 0 12px;
+  }
+
+  /* 主体留白收紧 */
+  html.aw .main { padding: 0 14px; }
+  html.aw .typecho-page-title h2 {
+    margin: 24px 0 14px; font-size: 1.4em;
+  }
+  html.aw .typecho-page-title h2::before { height: 22px; width: 5px; }
+  html.aw .typecho-page-title h2 a { padding: 8px 15px; font-size: 12px; }
+
+  /* 卡片 */
+  html.aw .welcome-board,
+  html.aw .typecho-table-wrap { padding: 20px 18px; border-radius: 20px; }
+  html.aw .latest-link { padding: 18px; border-radius: 20px; }
+
+  /* 表格横向滚动，不压扁 */
+  html.aw .typecho-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  html.aw .typecho-list-table { min-width: 560px; }
+
+  /* 标签页/操作条换行 */
+  html.aw .typecho-option-tabs { flex-wrap: wrap; }
+  html.aw .typecho-list-operate { flex-wrap: wrap; gap: 8px; }
+  html.aw .typecho-list-operate .search {
+    margin-left: 0; width: 100%; flex-wrap: wrap;
+  }
+  html.aw .typecho-list-operate .search input[type="text"] { flex: 1 1 140px; }
+
+  /* 写作页：单列 */
+  html.aw .typecho-post-area form {
+    display: block; width: 100%;
+  }
+  html.aw .col-tb-9,
+  html.aw .col-tb-3 { width: 100%; flex: none; }
+  html.aw #edit-secondary { margin-top: 18px; }
+  html.aw .typecho-post-area .title input.title { font-size: 22px; height: 52px; }
+  html.aw .editor { border-radius: 18px; }
+  html.aw .wmd-button-row {
+    flex-wrap: nowrap; overflow-x: auto; padding: 9px 12px; gap: 2px;
+  }
+  html.aw .wmd-button-row li span { min-width: 28px; padding: 0 6px; }
+  html.aw .wmd-button-row li.right { margin-left: 0; }
+  html.aw .typecho-post-area textarea { padding: 16px 16px 22px; min-height: 300px; }
+  html.aw .typecho-post-area .submit {
+    flex-direction: column-reverse; align-items: stretch; gap: 10px;
+  }
+  html.aw .typecho-post-area .submit .right { justify-content: flex-end; }
+  html.aw .typecho-post-area .submit .btn { height: 36px; }
+
+  /* 分页 */
+  html.aw .typecho-pager { flex-wrap: wrap; justify-content: center; margin-left: 0; }
+
+  /* 登录卡 */
+  html.aw[data-aw-login="1"] body.body-100 .typecho-login {
+    width: min(100vw - 32px, 380px); padding: 34px 24px 30px; border-radius: 24px;
+  }
+  html.aw .typecho-foot { padding: 28px 14px 36px; font-size: .85em; }
+}
+
+@media (max-width: 640px) {
+  /* 表格让位：只留标题 + 日期，别把作者挤成两行 */
+  html.aw .typecho-list-table {
+    table-layout: auto; min-width: 0;
+  }
+  html.aw .typecho-list-table col { width: auto !important; }
+  html.aw .typecho-list-table th:nth-child(4),
+  html.aw .typecho-list-table th:nth-child(5),
+  html.aw .typecho-list-table th:nth-child(6),
+  html.aw .typecho-list-table td:nth-child(4),
+  html.aw .typecho-list-table td:nth-child(5),
+  html.aw .typecho-list-table td:nth-child(6) { display: none; }
+  html.aw .typecho-list-table th,
+  html.aw .typecho-list-table td { padding-left: 6px; padding-right: 6px; }
+  html.aw .typecho-list-table td:nth-child(3) a:first-child { font-size: 14px; }
+
+  /* 筛选 tabs 靠右而不是换行消失 */
+  html.aw .typecho-option-tabs.right { float: none; margin-left: auto; }
+}
+
+@media (max-width: 520px) {
+  html.aw .typecho-head-nav .operate a.exit { display: none; }
+  html.aw .typecho-page-title h2 a { padding: 7px 13px; }
+  html.aw .typecho-list-table { min-width: 520px; }
+  html.aw .typecho-list-table td,
+  html.aw .typecho-list-table th { padding-left: 8px; padding-right: 8px; }
+  html.aw .btn { padding: 0 14px; font-size: 13px; }
+  html.aw .typecho-option-tabs a { padding: 0 13px; }
+  html.aw #start-link a { padding: 8px 14px; font-size: 13px; }
+}
+
+/* 移动端截图：演示外壳别挡着 */
+@media (max-width: 720px) {
+  #demo-bar { max-width: calc(100vw - 20px); flex-wrap: wrap; justify-content: center; }
+}
+
+/* 原版登录页也保持居中 */
+body.body-100 .typecho-head-nav { display: none; }
+body.body-100 .typecho-login-wrap { min-height: 100vh; }
+
+
+/* ============================================================
+   4. Typecho 原生结构适配
+   ============================================================ */
+
+/* 4.1 表单控件兜底：设置页、用户页也要好看 */
+html.aw textarea {
+  border: 1px solid transparent; border-radius: 16px;
+  background: var(--bg-soft); color: var(--text);
+  padding: 12px 16px; box-shadow: var(--shadow-in);
+  font-family: inherit; font-size: 13px; line-height: 1.7;
+  transition: .3s;
+}
+html.aw textarea:focus {
+  outline: none;
+  box-shadow: var(--shadow-in), 0 0 0 3px rgba(79, 155, 255, .26);
+}
+
+html.aw .typecho-option { margin-bottom: 22px; }
+html.aw .typecho-option label.typecho-label {
+  color: var(--text-mute); font-size: 12px; font-weight: 600;
+  letter-spacing: .05em; margin-bottom: 8px;
+}
+html.aw .typecho-option .description,
+html.aw p.description { color: var(--text-mute); font-size: 12px; line-height: 1.7; margin-top: 8px; }
+html.aw .typecho-option input[type="text"],
+html.aw .typecho-option textarea { width: 100%; }
+
+/* 4.2 提示条 */
+html.aw .message {
+  border-radius: 16px; border: 1px solid transparent;
+  padding: 14px 18px; box-shadow: var(--shadow-out);
+}
+html.aw .message.notice  { background: rgba(79, 155, 255, .12); color: #3b7fd4; }
+html.aw .message.error   { background: rgba(231, 120, 140, .14); color: #c25370; }
+html.aw .message.success { background: rgba(56, 214, 196, .14); color: #1f9e90; }
+
+/* 4.3 移动端：Typecho 575px 以下是底部固定栏，这里同步调高度和展开方向 */
+@media (max-width: 575px) {
+  html.aw .typecho-head-nav { height: 52px; padding: 0 12px; }
+  html.aw .typecho-head-nav button.menu-bar { height: 52px; }
+  html.aw .typecho-head-nav button.menu-bar.focus + #typecho-nav-list { bottom: 52px; }
+  html.aw .typecho-head-nav .operate a { height: 52px; line-height: 52px; padding: 0 8px; }
+  html.aw .typecho-head-nav .operate a.author {
+    height: 30px; line-height: 28px; margin-top: 11px; padding: 0 12px;
+  }
+  html.aw .typecho-head-nav button.menu-bar.focus + #typecho-nav-list > ul .parent a {
+    background: #20283a;
+  }
+  html.aw .typecho-head-nav button.menu-bar.focus + #typecho-nav-list > ul .child li {
+    border-bottom-color: rgba(255, 255, 255, .07);
+  }
+}
+
+/* 4.4 登录页：把 Typecho 的灰色方 logo 换成站点名 */
+html.aw[data-aw-login="1"] body.body-100 .typecho-login h1 { margin-bottom: 28px; }
+html.aw[data-aw-login="1"] body.body-100 .typecho-login h1 a.i-logo {
+  width: auto; height: auto; background: none;
+  text-indent: 0; opacity: 1; font-size: 0;
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login h1 a.i-logo::after {
+  content: "鲸落";
+  font-size: 24px; font-weight: 700; letter-spacing: .16em; color: #fff;
+  text-shadow: 0 6px 26px rgba(79, 155, 255, .55);
+}
+html.aw[data-aw-login="1"] body.body-100 .typecho-login form p { margin-bottom: 14px; }
+html.aw[data-aw-login="1"] body.body-100 .typecho-login .more-link a { color: rgba(255, 255, 255, .72); }
+
+/* 4.5 杂项 */
+html.aw .typecho-list-table img { border-radius: 10px; }
+html.aw .i-caret-down, html.aw .i-caret-left { opacity: .55; }

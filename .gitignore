@@ -1,0 +1,21 @@
+# 部署工具、SSH 私钥、数据库探针脚本（含服务器地址与凭据，绝不提交）
+.tools/
+
+# 内部文档：服务器信息、运维细节
+交接文档.md
+主题开发工作文档.md
+
+# 开发期视觉稿（一稿一稿改出来的中间产物）
+preview/
+
+# 全部原始截图（精选图在 docs/screenshots/，那部分要提交）
+/screenshots/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+node_modules/
+.idea/
+.vscode/

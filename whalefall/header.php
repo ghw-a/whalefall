@@ -87,6 +87,13 @@ $dswIcon = dswAvatarUrl();
     <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
     <symbol id="i-comment" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.9A8.4 8.4 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l8.8 8.6 8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+    <symbol id="i-play-solid" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="5" width="4" height="14" rx="1"/><rect x="13" y="5" width="4" height="14" rx="1"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h2v14H7z"/><path d="M20 5v14l-11-7z"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24" fill="currentColor"><path d="M15 5h2v14h-2z"/><path d="M4 5v14l11-7z"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-fire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-2.7 7-6.5 0-4.5-4.5-6-4.5-9.5 0-1.2.4-2.3 1-3-4 .5-8.5 4-8.5 9 0 1.3.4 2.4 1 3.3-1.5.4-2.5 1.7-2.5 3.2C5.5 20 8 22 12 22z"/></symbol>
     <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
@@ -124,9 +131,6 @@ $dswIcon = dswAvatarUrl();
         <button class="icon-btn" type="button" id="navSearchBtn" title="搜索" aria-label="搜索"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></button>
         <button class="icon-btn" type="button" id="paletteBtn" title="切换配色" aria-label="切换配色"><svg class="ico" aria-hidden="true"><use href="#i-palette"/></svg></button>
         <button class="icon-btn" type="button" id="navThemeBtn" title="切换主题" aria-label="切换主题" aria-pressed="false"><svg class="ico" id="navThemeIcon" aria-hidden="true"><use href="#i-moon"/></svg></button>
-        <?php $dswSocials = dswSocials(); foreach ($dswSocials as $dswS): if ('i-github' !== $dswS['icon']) { continue; } ?>
-        <a class="icon-btn" href="<?php echo htmlspecialchars($dswS['url'], ENT_QUOTES, 'UTF-8'); ?>" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener noreferrer"><svg class="ico" aria-hidden="true"><use href="#i-github"/></svg></a>
-        <?php endforeach; ?>
         <button class="icon-btn menu-toggle" type="button" id="menuToggle" aria-label="菜单" aria-expanded="false" aria-controls="menu">☰</button>
       </div>
     </div>

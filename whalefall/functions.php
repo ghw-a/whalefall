@@ -14,7 +14,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
 }
 
-define('DSW_VERSION', '2.0.1');
+define('DSW_VERSION', '2.3.0');
 
 /* ============================================================
  * 0. 主题选项：默认值 / 读取
@@ -57,6 +57,12 @@ function dswDefaults(): array
         'showScrollHint'  => '1',
         'showQuickNav'    => '1',
         'hotWidgetTitle'  => '最近文章',
+        'musicOn'         => '1',
+        'musicMode'       => 'fixed',
+        'gdKeyword'       => 'ACG',
+        'gdSource'        => 'netease',
+        'gdCount'         => '30',
+        'musicVolume'     => '0.7',
     ];
 }
 
@@ -389,6 +395,64 @@ function themeConfig($form)
         _t('侧栏文章小工具标题'),
         _t('默认「最近文章」；若装了浏览量插件可改成「热门文章」。')
     ));
+
+    /** 音乐播放器 */
+    $form->addInput(new \Typecho\Widget\Helper\Form\Element\Select(
+        'musicOn',
+        ['1' => _t('显示'), '0' => _t('关闭')],
+        '1',
+        _t('右下角音乐播放器'),
+        _t('关闭后全站不输出播放器 DOM，也不初始化播放器脚本。')
+    ));
+
+    $form->addInput(new \Typecho\Widget\Helper\Form\Element\Select(
+        'musicMode',
+        [
+            'fixed'  => _t('固定歌单（推荐）'),
+            'search' => _t('关键词实时搜索'),
+        ],
+        'fixed',
+        _t('歌单来源'),
+        _t('固定歌单读主题自带 assets/playlist.json，顺序和曲目永远不变、点开即播；关键词模式每次现搜，风格会飘。')
+    ));
+
+    $form->addInput(new \Typecho\Widget\Helper\Form\Element\Text(
+        'gdKeyword',
+        null,
+        'ACG',
+        _t('搜索关键词（仅关键词模式）'),
+        _t('播放列表 = 用这个关键词搜出来的歌。可以填歌手、歌名、专辑（如「周杰伦」「纯音乐」「ACG」）。')
+    ));
+
+    $form->addInput(new \Typecho\Widget\Helper\Form\Element\Select(
+        'gdSource',
+        [
+            'netease'  => _t('网易云 netease'),
+            'joox'     => _t('JOOX（多数地区可播，推荐）'),
+            'bilibili' => _t('哔哩哔哩 bilibili'),
+            'tencent'  => _t('QQ音乐 tencent'),
+            'kuwo'     => _t('酷我 kuwo'),
+        ],
+        'netease',
+        _t('音乐源'),
+        _t('GD音乐台只开放了部分源，挂了就换一个。实测 joox 最稳，netease 偶尔抽风。')
+    ));
+
+    $form->addInput(new \Typecho\Widget\Helper\Form\Element\Text(
+        'gdCount',
+        null,
+        '30',
+        _t('每次取几首'),
+        _t('1 ~ 50，默认 30。取多了歌单更长，但首次加载会慢一点点。')
+    ));
+
+    $form->addInput(new \Typecho\Widget\Helper\Form\Element\Text(
+        'musicVolume',
+        null,
+        '0.7',
+        _t('默认音量'),
+        _t('0 ~ 1，建议 0.6 ~ 0.8。访客调过之后会记在浏览器里。')
+    ));
 }
 
 /* ============================================================
@@ -437,6 +501,10 @@ function themeInit($archive): void
 {
     if ('dsw-like' === (string)($_POST['action'] ?? '')) {
         dswHandleLike();
+    }
+
+    if ('dsw-music' === (string)($_POST['action'] ?? '')) {
+        dswHandleMusic();
     }
 }
 
@@ -568,6 +636,370 @@ function dswHandleLike(): void
         'formatted' => dswFormatCount($likes),
         'already'   => $already,
     ]);
+}
+
+/* ============================================================
+ * 2.6 音乐播放器接口（GD音乐台代理 + 文件缓存）
+ *
+ * 为什么必须走服务端：
+ *   1) music-api.gdstudio.xyz 不返回 Access-Control-Allow-Origin，
+ *      浏览器直接 fetch 会被 CORS 拦掉；
+ *   2) 官方限流「5 分钟 50 次」，多人同时访问会瞬间打满，必须缓存兜住。
+ * 接口：POST 到当前页面地址，body：
+ *   action=dsw-music&do=search&q=<关键词>&source=<源>&count=<条数>
+ *   action=dsw-music&do=url&id=<曲目ID>&source=<源>
+ *   action=dsw-music&do=pic&id=<封面ID>&source=<源>
+ * 出处：GD音乐台 https://music.gdstudio.xyz（CC BY-NC 4.0，仅供个人学习）
+ * ============================================================ */
+
+/**
+ * GD音乐台可用的音乐源（白名单，别让人随便塞参数）
+ */
+function dswMusicSources(): array
+{
+    return ['netease', 'joox', 'bilibili', 'tencent', 'kuwo'];
+}
+
+/**
+ * 主题自带的固定歌单（assets/playlist.json）
+ *
+ * 读不到 / 格式不对就返回空数组，前端会自动退回「关键词实时搜索」。
+ * 顺序即播放顺序，不再受音乐台搜索结果波动影响。
+ */
+function dswMusicPlaylist(): array
+{
+    static $list = null;
+
+    if (null !== $list) {
+        return $list;
+    }
+
+    $list = [];
+    $file = __DIR__ . '/assets/playlist.json';
+
+    if (!is_readable($file)) {
+        return $list;
+    }
+
+    $raw = @file_get_contents($file);
+    $data = is_string($raw) ? json_decode($raw, true) : null;
+
+    if (!is_array($data)) {
+        return $list;
+    }
+
+    foreach ($data as $row) {
+        if (!is_array($row) || empty($row['id'])) {
+            continue;
+        }
+
+        $source = (string)($row['source'] ?? 'netease');
+
+        if (!in_array($source, dswMusicSources(), true)) {
+            $source = 'netease';
+        }
+
+        $list[] = [
+            'id'     => (string)$row['id'],
+            'name'   => (string)($row['name'] ?? ''),
+            'artist' => (string)($row['artist'] ?? ''),
+            'album'  => (string)($row['album'] ?? ''),
+            'pic'    => (string)($row['pic'] ?? ''),
+            'picId'  => (string)($row['picId'] ?? ''),
+            'source' => $source,
+        ];
+    }
+
+    return $list;
+}
+
+/**
+ * 接口基地址
+ */
+function dswMusicApiBase(): string
+{
+    return 'https://music-api.gdstudio.xyz/api.php';
+}
+
+/**
+ * 缓存目录：优先 usr/cache/whale-music，不可写就退到系统临时目录
+ */
+function dswMusicCacheDir(): string
+{
+    static $dir = null;
+
+    if (null !== $dir) {
+        return $dir;
+    }
+
+    $root = defined('__TYPECHO_ROOT_DIR__') ? __TYPECHO_ROOT_DIR__ : sys_get_temp_dir();
+    $target = rtrim($root, '/\\') . '/usr/cache/whale-music';
+
+    if (!is_dir($target)) {
+        @mkdir($target, 0755, true);
+    }
+
+    if (!is_dir($target) || !is_writable($target)) {
+        $target = rtrim(sys_get_temp_dir(), '/\\') . '/whale-music';
+        if (!is_dir($target)) {
+            @mkdir($target, 0755, true);
+        }
+    }
+
+    $dir = $target;
+
+    return $dir;
+}
+
+/**
+ * 读缓存（秒级过期）
+ */
+function dswMusicCacheGet(string $key, int $ttl): ?string
+{
+    $file = dswMusicCacheDir() . '/' . md5($key) . '.cache';
+
+    if (!is_file($file)) {
+        return null;
+    }
+
+    $mtime = @filemtime($file);
+
+    if (false === $mtime || (time() - $mtime) > $ttl) {
+        return null;
+    }
+
+    $raw = @file_get_contents($file);
+
+    return is_string($raw) && '' !== $raw ? $raw : null;
+}
+
+/**
+ * 写缓存
+ */
+function dswMusicCachePut(string $key, string $data): void
+{
+    @file_put_contents(dswMusicCacheDir() . '/' . md5($key) . '.cache', $data, LOCK_EX);
+}
+
+/**
+ * 带超时的 GET：有 curl 用 curl，没装就 file_get_contents
+ */
+function dswMusicHttpGet(string $url, int $timeout = 12): ?string
+{
+    $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS      => 3,
+            CURLOPT_CONNECTTIMEOUT => 6,
+            CURLOPT_TIMEOUT        => $timeout,
+            CURLOPT_USERAGENT      => $ua,
+        ]);
+
+        $body = curl_exec($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if (200 === $code && is_string($body) && '' !== $body) {
+            return $body;
+        }
+
+        return null;
+    }
+
+    $context = stream_context_create([
+        'http' => ['timeout' => $timeout, 'header' => "User-Agent: {$ua}\r\n"],
+    ]);
+    $body = @file_get_contents($url, false, $context);
+
+    return is_string($body) && '' !== $body ? $body : null;
+}
+
+/**
+ * 音乐接口：搜索 / 取音频地址 / 取封面
+ */
+function dswHandleMusic(): void
+{
+    header('Content-Type: application/json; charset=UTF-8');
+    header('Cache-Control: no-store, no-cache, must-revalidate');
+    header('X-Robots-Tag: noindex');
+
+    $reply = static function (int $code, array $payload): void {
+        /* Typecho 的 Response 层会覆盖裸设的状态码，两边都写一遍才稳 */
+        if (class_exists('\Typecho\Response')) {
+            \Typecho\Response::getInstance()->setStatus($code);
+        }
+        http_response_code($code);
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    };
+
+    if ('POST' !== strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? ''))) {
+        $reply(405, ['ok' => false, 'msg' => 'Method Not Allowed']);
+    }
+
+    $host = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
+    $refHost = strtolower((string)parse_url((string)($_SERVER['HTTP_REFERER'] ?? ''), PHP_URL_HOST));
+
+    if ('' !== $refHost && '' !== $host && $refHost !== $host) {
+        $reply(403, ['ok' => false, 'msg' => 'Forbidden']);
+    }
+
+    $do = (string)($_POST['do'] ?? '');
+    $source = (string)($_POST['source'] ?? '');
+
+    if (!in_array($source, dswMusicSources(), true)) {
+        $source = 'netease';
+    }
+
+    $base = dswMusicApiBase();
+
+    /* ---------- 搜索：缓存 10 分钟 ---------- */
+    if ('search' === $do) {
+        $keyword = trim(strip_tags((string)($_POST['q'] ?? '')));
+        $keyword = function_exists('mb_substr') ? mb_substr($keyword, 0, 40, 'UTF-8') : substr($keyword, 0, 40);
+
+        if ('' === $keyword) {
+            $reply(400, ['ok' => false, 'msg' => '后台还没填搜索关键词']);
+        }
+
+        $count = (int)($_POST['count'] ?? 30);
+        $count = max(1, min(50, $count));
+
+        $cacheKey = 'search|' . $source . '|' . $count . '|' . $keyword;
+        $cached = dswMusicCacheGet($cacheKey, 600);
+
+        if (null !== $cached) {
+            $items = json_decode($cached, true);
+            $reply(200, ['ok' => true, 'cached' => true, 'items' => is_array($items) ? $items : []]);
+        }
+
+        $url = $base . '?types=search&source=' . rawurlencode($source)
+            . '&name=' . rawurlencode($keyword)
+            . '&count=' . $count . '&pages=1';
+        $raw = dswMusicHttpGet($url);
+
+        if (null === $raw) {
+            $reply(502, ['ok' => false, 'msg' => '音乐台连不上']);
+        }
+
+        $data = json_decode($raw, true);
+        $items = [];
+
+        if (is_array($data)) {
+            foreach ($data as $row) {
+                if (!is_array($row) || empty($row['id'])) {
+                    continue;
+                }
+
+                $artist = $row['artist'] ?? '';
+
+                if (is_array($artist)) {
+                    $artist = implode(' / ', array_map('strval', $artist));
+                }
+
+                $picId = (string)($row['pic_id'] ?? '');
+                $pic = '';
+
+                /* bilibili 的 pic_id 直接就是图片地址，其余的是 ID 要再查一次 */
+                if (0 === strpos($picId, '//')) {
+                    $pic = 'https:' . $picId;
+                    $picId = '';
+                } elseif (0 === strpos($picId, 'http')) {
+                    $pic = $picId;
+                    $picId = '';
+                }
+
+                $items[] = [
+                    'id'     => (string)$row['id'],
+                    'name'   => (string)($row['name'] ?? ''),
+                    'artist' => (string)$artist,
+                    'album'  => (string)($row['album'] ?? ''),
+                    'pic'    => $pic,
+                    'picId'  => $picId,
+                    'source' => $source,
+                ];
+            }
+        }
+
+        if (!$items) {
+            $reply(404, ['ok' => false, 'msg' => '没搜到歌，换个关键词试试']);
+        }
+
+        dswMusicCachePut($cacheKey, json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $reply(200, ['ok' => true, 'cached' => false, 'items' => $items]);
+    }
+
+    /* ---------- 音频地址：缓存 30 分钟（直链有时效） ---------- */
+    if ('url' === $do) {
+        $id = trim((string)($_POST['id'] ?? ''));
+
+        if ('' === $id) {
+            $reply(400, ['ok' => false, 'msg' => 'Bad Request']);
+        }
+
+        $cacheKey = 'url|' . $source . '|' . $id;
+        $cached = dswMusicCacheGet($cacheKey, 1800);
+
+        if (null !== $cached) {
+            $reply(200, ['ok' => true, 'url' => $cached]);
+        }
+
+        $raw = dswMusicHttpGet($base . '?types=url&source=' . rawurlencode($source)
+            . '&id=' . rawurlencode($id) . '&br=320');
+
+        if (null === $raw) {
+            $reply(502, ['ok' => false, 'msg' => '音乐台连不上']);
+        }
+
+        $data = json_decode($raw, true);
+        $playUrl = is_array($data) ? (string)($data['url'] ?? '') : '';
+
+        if ('' === $playUrl) {
+            $reply(404, ['ok' => false, 'msg' => '这首歌暂时拿不到音频']);
+        }
+
+        dswMusicCachePut($cacheKey, $playUrl);
+        $reply(200, ['ok' => true, 'url' => $playUrl]);
+    }
+
+    /* ---------- 封面：缓存 24 小时 ---------- */
+    if ('pic' === $do) {
+        $id = trim((string)($_POST['id'] ?? ''));
+
+        if ('' === $id) {
+            $reply(400, ['ok' => false, 'msg' => 'Bad Request']);
+        }
+
+        $cacheKey = 'pic|' . $source . '|' . $id;
+        $cached = dswMusicCacheGet($cacheKey, 86400);
+
+        if (null !== $cached) {
+            $reply(200, ['ok' => true, 'url' => $cached]);
+        }
+
+        $raw = dswMusicHttpGet($base . '?types=pic&source=' . rawurlencode($source)
+            . '&id=' . rawurlencode($id) . '&size=500');
+
+        if (null === $raw) {
+            $reply(502, ['ok' => false, 'msg' => '音乐台连不上']);
+        }
+
+        $data = json_decode($raw, true);
+        $picUrl = is_array($data) ? (string)($data['url'] ?? '') : '';
+
+        if ('' === $picUrl) {
+            $reply(404, ['ok' => false, 'msg' => '没有封面']);
+        }
+
+        dswMusicCachePut($cacheKey, $picUrl);
+        $reply(200, ['ok' => true, 'url' => $picUrl]);
+    }
+
+    $reply(400, ['ok' => false, 'msg' => 'Bad Request']);
 }
 
 /* ============================================================
@@ -872,25 +1304,35 @@ function dswMenuItems(\Widget\Archive $archive): array
         'active' => $archive->is('index'),
     ];
 
-    // 独立页面
+    // 独立页面（「关于」页单独留到最后，钉在导航最右）
+    $aboutItem = null;
     try {
         /* 第 4 参 false = 独立实例；共享 widget 池的游标会互相干扰 */
         $pages = \Typecho\Widget::widget('Widget_Contents_Page_List', null, null, false);
         while ($pages->next()) {
             $slug = (string)$pages->slug;
+            $title = (string)$pages->title;
+            $isAbout = false !== strpos($slug, 'about') || false !== strpos($title, '关于');
             $icon = 'i-book';
             if (false !== strpos($slug, 'archive')) {
                 $icon = 'i-archive';
-            } elseif (false !== strpos($slug, 'about') || false !== strpos($slug, 'about-me')) {
+            } elseif ($isAbout) {
                 $icon = 'i-user';
             }
 
-            $items[] = [
+            $item = [
                 'url'    => $pages->permalink,
-                'label'  => $pages->title,
+                'label'  => $title,
                 'icon'   => $icon,
                 'active' => $archive->is('page', $slug),
             ];
+
+            /* 「关于」固定排到最右（分类之后），其余页面保持后台顺序 */
+            if ($isAbout && null === $aboutItem) {
+                $aboutItem = $item;
+            } else {
+                $items[] = $item;
+            }
         }
     } catch (\Exception $e) {
         // 忽略
@@ -917,6 +1359,11 @@ function dswMenuItems(\Widget\Archive $archive): array
         }
     } catch (\Exception $e) {
         // 忽略
+    }
+
+    // 「关于」压轴：保证它永远是最右一项
+    if (null !== $aboutItem) {
+        $items[] = $aboutItem;
     }
 
     return $items;
